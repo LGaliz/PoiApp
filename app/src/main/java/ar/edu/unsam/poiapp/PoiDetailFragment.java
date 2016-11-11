@@ -65,7 +65,7 @@ public class PoiDetailFragment extends Fragment {
         if (poi != null) {
             ((TextView) rootView.findViewById(R.id.poi_detail)).setText(poi.getNombre());
 
-            ((TextView) rootView.findViewById(R.id.poi_detail)).setText("Direccion: \n"+poi.getDireccion());
+            ((TextView) rootView.findViewById(R.id.poi_detail)).setText("Dirección: \n"+poi.getDireccion());
         }
 
         return rootView;
