@@ -9,10 +9,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.List;
 
 import ar.edu.unsam.poiapp.adapter.PoiAdapter;
 import ar.edu.unsam.poiapp.domain.Poi;
 import ar.edu.unsam.poiapp.repo.RepoPois;
+import ar.edu.unsam.poiapp.service.PoiService;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.GsonConverterFactory;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 
 /**
@@ -25,6 +35,9 @@ import ar.edu.unsam.poiapp.repo.RepoPois;
  * interface.
  */
 public class PoiListFragment extends ListFragment {
+
+
+    //public static int MIN_BUSQUEDA_PELICULAS = 2;
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -43,11 +56,8 @@ public class PoiListFragment extends ListFragment {
      */
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
-    /**
-     * A callback interface that all activities containing this fragment must
-     * implement. This mechanism allows activities to be notified of item
-     * selections.
-     */
+    private PoiService poiService;
+
     public interface Callbacks {
         void onItemSelected(Poi poi);
     }
@@ -74,16 +84,53 @@ public class PoiListFragment extends ListFragment {
     public PoiListFragment() {
 
     }
-
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setListAdapter(new PoiAdapter(
-                getActivity(),
-                RepoPois.getInstance().getPois(null, 10)));
 
+        String BASE_URL = "http://10.0.2.2:9006/";
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        PoiService poiService = retrofit.create(PoiService.class);
+
+        Call<List<Poi>> poiCall = poiService.getPois();
+
+        //poiCall.execute(Response<List<Poi>> response, Retrofit retrofit);
+
+        poiCall.enqueue(new Callback<List<Poi>>() {
+            @Override
+            public void onResponse(Response<List<Poi>> response, Retrofit retrofit) {
+                List<Poi> pois = response.body();
+
+                setListAdapter(new PoiAdapter(
+                        getActivity(),
+                        pois));
+                //RepoPois.getInstance().getPois(null, 10)));
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                t.printStackTrace();
+                Log.e("PoiApp", t.getMessage());
+                Toast.makeText(getContext(), "Ha ocurrido un error al llamar al servicio", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
+
+
+//        setListAdapter(new PoiAdapter(
+//                getActivity(),
+//                RepoPois.getInstance().getPois(null, 10)));
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -115,7 +162,6 @@ public class PoiListFragment extends ListFragment {
     @Override
     public void onDetach() {
         super.onDetach();
-
         // Reset the active callbacks interface to the dummy implementation.
         mCallbacks = sDummyCallbacks;
     }
@@ -123,10 +169,12 @@ public class PoiListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
-
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        Poi poi = RepoPois.getInstance().getPoi(id);
+
+        //Poi poi = RepoPois.getInstance().getPoi(id);
+        Poi poi = (Poi) listView.getAdapter().getItem(position);
+        Toast.makeText(getContext(), poi.getNombre(), Toast.LENGTH_LONG).show();
         mCallbacks.onItemSelected(poi);
     }
 

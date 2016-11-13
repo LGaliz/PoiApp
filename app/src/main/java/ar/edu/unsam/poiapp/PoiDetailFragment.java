@@ -11,6 +11,9 @@ import android.widget.TextView;
 
 import ar.edu.unsam.poiapp.domain.Poi;
 import ar.edu.unsam.poiapp.repo.RepoPois;
+import ar.edu.unsam.poiapp.service.PoiService;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
 
 /**
  * A fragment representing a single Poi detail screen.
@@ -39,6 +42,8 @@ public class PoiDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
 
